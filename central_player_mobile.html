@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#050202">
+<title>Central do Player Mobile V2.1 Corrigida</title>
+<style>
+:root{
+  --bg:#050202;--panel:#120706;--panel2:#090404;--line:#522629;--line2:#843940;
+  --txt:#fff3ea;--mut:#bda69d;--red:#e43642;--blood:#690912;--gold:#d8a549;
+  --green:#88d26d;--blue:#83baff;--purple:#c997ff;--r:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--txt);font-family:Georgia,"Times New Roman",serif;overscroll-behavior:none}
+body{
+  background:
+    radial-gradient(circle at 10% 0,rgba(228,54,66,.24),transparent 34%),
+    linear-gradient(145deg,#030101,#150707 55%,#050202);
+  padding-bottom:84px;
+}
+body.morte{--red:#aaa;--blood:#111;--gold:#ddd;--line:#3a3a3a;--line2:#777}
+body.conhecimento{--red:#d8a549;--blood:#4d3409;--gold:#ffe2a3;--line:#5b4520;--line2:#9b7838}
+body.energia{--red:#b965ff;--blood:#1a0730;--gold:#e5c7ff;--line:#4d2868;--line2:#8b4cc0}
+.app{width:min(760px,calc(100% - 14px));margin:8px auto 110px}
+.card,.stat,.panel{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(28,13,14,.96),rgba(8,4,4,.96));
+  border-radius:var(--r);
+  box-shadow:0 14px 38px rgba(0,0,0,.38);
+}
+.header{padding:12px;position:sticky;top:0;z-index:40;backdrop-filter:blur(10px)}
+.hero{display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:center}
+.avatar{width:58px;height:58px;border:1px solid var(--line2);border-radius:14px;display:grid;place-items:center;background:radial-gradient(circle,rgba(228,54,66,.32),#050202 72%);font-size:24px;font-weight:900}
+h1{margin:0;font-size:24px;line-height:1;text-transform:uppercase;text-shadow:2px 2px #000}
+h2{margin:0 0 10px;font-size:17px;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:8px}
+h2:before{content:"";width:24px;height:3px;background:var(--red);box-shadow:0 0 12px var(--red)}
+h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--red)}
+p,.muted,.meta{color:var(--mut);line-height:1.45}.meta{font-size:12px}.desc{white-space:pre-wrap;color:rgba(255,255,255,.86);line-height:1.35}
+.badges,.actions,.mini{display:flex;flex-wrap:wrap;gap:7px}
+.badge{display:inline-flex;align-items:center;min-height:25px;border:1px solid var(--line2);background:rgba(0,0,0,.25);border-radius:999px;color:var(--mut);font-size:10px;text-transform:uppercase;font-weight:900;padding:4px 8px}
+.ok{color:#dfffd6;border-color:rgba(136,210,109,.7)}.warn{color:#ffe4a9;border-color:rgba(216,165,73,.8)}.bad{color:#ffd0d0;border-color:rgba(228,54,66,.85)}.info{color:#d8ebff;border-color:rgba(131,186,255,.75)}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.stat{padding:10px;background:rgba(0,0,0,.24);box-shadow:none}
+.statTop{display:flex;justify-content:space-between;gap:8px}.statName{text-transform:uppercase;font-size:11px;font-weight:900}.statValue{font-size:21px;font-weight:900}
+.bar{height:9px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.55);border-radius:99px;overflow:hidden;margin-top:7px}
+.fill{height:100%;background:linear-gradient(90deg,#8b1018,var(--red))}.blueFill{background:linear-gradient(90deg,#1d4169,var(--blue))}.greenFill{background:linear-gradient(90deg,#2f652c,var(--green))}
+.card{padding:12px;margin-top:10px}.item{border:1px solid var(--line);background:rgba(0,0,0,.25);border-radius:14px;padding:11px;margin-top:9px}
+.title{font-weight:900;text-transform:uppercase;color:#fff}
+button,.filebtn,input,select,textarea{font:inherit}
+button,.filebtn{
+  min-height:42px;border:1px solid var(--line);background:#130808;color:var(--txt);
+  padding:9px 10px;border-radius:11px;text-transform:uppercase;font-weight:900;font-size:11px;letter-spacing:.05em;
+}
+button:active,.filebtn:active{transform:scale(.98)}
+.danger{background:var(--blood);border-color:var(--red)}.green{border-color:rgba(136,210,109,.72);color:#dfffd6}.blue{border-color:rgba(131,186,255,.72);color:#d8ebff}.gold{border-color:rgba(216,165,73,.82);color:#ffe4a9}.purple{border-color:rgba(201,151,255,.82);color:#efd8ff}
+label{display:block;margin:8px 0 5px;color:var(--mut);font-size:10px;text-transform:uppercase;font-weight:900;letter-spacing:.08em}
+input,select,textarea{width:100%;min-height:42px;border:1px solid #4b2c2c;background:#0d0606;color:var(--txt);padding:10px;outline:none;border-radius:11px}
+textarea{min-height:96px;resize:vertical}
+input[type=file]{display:none}
+.grid{display:grid;gap:8px}.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:1fr 1fr 1fr}
+.nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:linear-gradient(180deg,rgba(5,2,2,.82),rgba(5,2,2,.98));
+  border-top:1px solid var(--line);backdrop-filter:blur(12px);
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+}
+.navScroller{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.navScroller::-webkit-scrollbar{display:none}
+.nav button{white-space:nowrap;min-width:max-content}.nav .active{border-color:var(--red);background:rgba(105,9,18,.7)}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;z-index:80;background:#100707;border:1px solid var(--red);border-radius:14px;padding:11px 14px;box-shadow:0 12px 34px rgba(0,0,0,.5);transition:.18s;max-width:calc(100% - 24px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.rollPop{position:fixed;left:10px;right:10px;top:12px;z-index:90;opacity:0;transform:translateY(-16px);transition:.2s;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(18,7,7,.99),rgba(6,2,2,.99));border-radius:16px;padding:14px;box-shadow:0 18px 50px rgba(0,0,0,.65)}
+.rollPop.show{opacity:1;transform:translateY(0)}.rpTitle{font-weight:900;text-transform:uppercase}.rpResult{font-size:36px;font-weight:900;color:var(--gold);line-height:1.1;margin-top:5px}.rpDetail{color:var(--mut);font-size:13px;margin-top:5px;word-break:break-word}
+.modalBg{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;display:none;align-items:flex-end}
+.modal{width:100%;max-height:88vh;overflow:auto;background:#100707;border:1px solid var(--line2);border-radius:20px 20px 0 0;padding:14px;box-shadow:0 -18px 50px rgba(0,0,0,.5)}
+.modalBg.show{display:flex}
+.checkline{display:flex;gap:8px;align-items:center;color:var(--mut);font-size:13px}.checkline input{width:auto;min-height:auto}
+pre{white-space:pre-wrap;color:var(--mut);font-family:inherit;font-size:12px}
+@media(min-width:680px){.quick{grid-template-columns:repeat(4,1fr)}.grid.auto{grid-template-columns:1fr 1fr}.nav{left:50%;transform:translateX(-50%);width:min(760px,100%);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0}}
+</style>
+</head>
+<body class="sangue">
+<main class="app">
+  <section class="header card">
+    <div class="hero">
+      <div class="avatar" id="avatar">A</div>
+      <div>
+        <span class="badge bad">HTML Mobile V2.1</span>
+        <h1 id="heroName">Agente</h1>
+        <div class="badges">
+          <span class="badge info" id="heroClass"></span>
+          <span class="badge warn" id="heroNex"></span>
+          <span class="badge ok" id="heroMode">Sessão</span>
+        </div>
+      </div>
+    </div>
+    <div class="quick" id="quick"></div>
+  </section>
+
+  <section id="view"></section>
+</main>
+
+<nav class="nav"><div class="navScroller" id="nav"></div></nav>
+<div class="toast" id="toast"></div>
+<div class="rollPop" id="rollPop"></div>
+<div class="modalBg" id="modalBg"><div class="modal" id="modal"></div></div>
+
+<script>
+const KEY='central-player-mobile-v1';
+const ATTRS=['Força','Agilidade','Intelecto','Presença','Vigor'];
+const SKILLS=['Acrobacia','Adestramento','Artes','Atletismo','Atualidades','Ciências','Crime','Diplomacia','Enganação','Fortitude','Furtividade','Iniciativa','Intimidação','Intuição','Investigação','Luta','Medicina','Ocultismo','Percepção','Pilotagem','Pontaria','Profissão','Reflexos','Religião','Sobrevivência','Tática','Tecnologia','Vontade'];
+const TYPES=['Balístico','Corte','Impacto','Perfuração','Fogo','Frio','Químico','Sangue','Morte','Conhecimento','Energia','Medo'];
+const TABS=[
+ ['sessao','Sessão'],['ficha','Ficha'],['perfil','Origem'],['pericias','Perícias'],['armas','Armas'],
+ ['rituais','Rituais'],['poderes','Poderes'],['inventario','Inventário'],['defesa','Defesa'],
+ ['condicoes','Condições'],['marcas','Marcas'],['investigacao','Investigação'],['preparar','Preparar'],
+ ['evolucao','Evolução'],['validar','Validador'],['backup','Backups'],['json','JSON'],['config','Config']
+];
+const OPT={nexNivel:'NEX & Nível',semSanidade:'Jogando sem Sanidade',municao:'Contador de Munição',combateNarrativo:'Combate Narrativo',conjuracaoComplexa:'Conjuração Complexa',alteracoesNex:'Alterações de NEX'};
+let tab='sessao';
+let S=loadState();
+
+function blank(){
+ const attrs={},skills={}; ATTRS.forEach(a=>attrs[a]=1); SKILLS.forEach(s=>skills[s]={attr:skillAttr(s),train:0,bonus:0,temp:0,dice:0});
+ return {
+  p:{name:'Agente Sem Nome',class:'Sobrevivente',trail:'—',origin:'—',nex:5,level:1,affinity:'',theme:'sangue'},
+  stats:{pv:20,pvMax:20,pe:4,peMax:4,pd:0,pdMax:0,san:20,sanMax:20,def:10,rd:0,dt:10,move:9,peTurn:1,load:0,loadMax:10},
+  attrs,skills,optional:{nexNivel:false,semSanidade:false,municao:true,combateNarrativo:false,conjuracaoComplexa:false,alteracoesNex:false},
+  profile:{concept:'',originPower:'',originSkills:'',classAbility:'',trailAbilities:'',appearance:'',personality:'',fear:'',objective:''},
+  weapons:[{id:id('w'),name:'Ataque Improvisado',skill:'Luta',attr:'Força',test:'1d20+0',damage:'1d6',type:'Impacto',crit:'20/x2',range:'Corpo a corpo',category:'I',ammo:0,ammoMax:0,mods:'',curses:'',fav:true,equipped:true,notes:''}],
+  rituals:[],powers:[],items:[],protections:[],buffs:[],conditions:[],injuries:[],marks:[],nexChanges:[],combos:[],evolution:[],backups:[],logs:[],
+  prepare:{title:'',mainAction:'',moveAction:'',freeAction:'',reaction:'',use:'',target:'',pe:0,pd:0,pv:0,san:0,tests:'',damage:'',condition:'',failPlan:'',notes:''},
+  mission:{name:'',objective:'',secondary:'',location:'',threat:'',npcs:'',clues:'',documents:'',symbols:'',suspects:'',questions:'',theories:'',timeline:'',relations:''},
+  rest:{lastRest:'',interludeActions:'',treatment:'',crafting:'',study:'',training:''},
+  turn:{scene:1,round:1,peSpent:0,pdSpent:0}
+ };
+}
+function skillAttr(s){const m={Acrobacia:'Agilidade',Crime:'Agilidade',Furtividade:'Agilidade',Iniciativa:'Agilidade',Pilotagem:'Agilidade',Pontaria:'Agilidade',Reflexos:'Agilidade',Atletismo:'Força',Luta:'Força',Fortitude:'Vigor',Adestramento:'Presença',Artes:'Presença',Diplomacia:'Presença',Enganação:'Presença',Intimidação:'Presença',Intuição:'Presença',Percepção:'Presença',Vontade:'Presença'};return m[s]||'Intelecto'}
+function id(p='id'){return p+Date.now()+Math.floor(Math.random()*99999)}
+function n(v){return Number(v||0)}
+function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;")}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function initials(s){return String(s||'A').trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase()||'A'}
+function loadState(){try{return merge(blank(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){return blank()}}
+function merge(base,raw){
+ const out={...base,...raw}; ['p','stats','attrs','skills','optional','profile','prepare','mission','rest','turn'].forEach(k=>out[k]={...base[k],...(raw[k]||{})});
+ ['weapons','rituals','powers','items','protections','buffs','conditions','injuries','marks','nexChanges','combos','evolution','backups','logs'].forEach(k=>out[k]=Array.isArray(out[k])?out[k]:[]);
+ SKILLS.forEach(s=>{out.skills[s]={...base.skills[s],...(out.skills[s]||{})}});
+ return out;
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+function opt(k){return !!S.optional[k]}
+function peLimit(){return Math.max(1,Math.ceil(n(S.p.nex)/5))}
+function applyRules(){if(opt('nexNivel')){S.p.level=peLimit();S.stats.peTurn=peLimit()}}
+function derived(){
+ applyRules();
+ const st={...S.stats};
+ S.protections.filter(x=>x.equipped).forEach(x=>{st.def+=n(x.def);st.rd+=n(x.rd)});
+ S.buffs.filter(x=>x.active).forEach(x=>{st.def+=n(x.def);st.rd+=n(x.rd);st.dt+=n(x.dt)});
+ return st;
+}
+function render(){
+ applyRules(); save();
+ document.body.className=S.p.theme||'sangue';
+ const st=derived();
+ avatar.textContent=initials(S.p.name); heroName.textContent=S.p.name;
+ heroClass.textContent=`${S.p.class} • ${S.p.trail}`; heroNex.textContent=`NEX ${S.p.nex}% • Nível ${S.p.level}`;
+ quick.innerHTML=stat('PV',st.pv,st.pvMax,'')+(opt('semSanidade')?stat('PD',st.pd,st.pdMax,'blueFill'):stat('PE',st.pe,st.peMax,'blueFill')+stat('SAN',st.san,st.sanMax,'greenFill'))+`<div class="stat"><div class="statTop"><span class="statName">DEF/RD</span><span class="statValue">${st.def}/${st.rd}</span></div><p class="meta">DT ${st.dt} • Mov ${st.move}m</p></div>`;
+ nav.innerHTML=TABS.map(t=>`<button class="${tab===t[0]?'active':''}" onclick="tab='${t[0]}';render()">${t[1]}</button>`).join('');
+ view.innerHTML=(views[tab]||views.sessao)();
+}
+function stat(name,cur,max,cls){const key=name.toLowerCase(),pct=max?clamp(cur/max*100,0,100):0;return `<div class="stat"><div class="statTop"><span class="statName">${name}</span><span class="statValue">${cur}/${max}</span></div><div class="bar"><div class="fill ${cls}" style="width:${pct}%"></div></div><div class="mini"><button onclick="adj('${key}',-1)">-1</button><button class="green" onclick="adj('${key}',1)">+1</button></div></div>`}
+function adj(k,v){S.stats[k]=clamp(n(S.stats[k])+v,0,n(S.stats[k+'Max']||9999));log('Status',`${k.toUpperCase()} ${v>0?'+':''}${v}`);render()}
+function get(path){return path.split('.').reduce((o,k)=>o&&o[k],S)}
+function set(path,val){const p=path.split('.');let o=S;for(let i=0;i<p.length-1;i++){o=o[p[i]]}o[p.at(-1)]=val;render()}
+function field(label,path,lines=1){const v=esc(get(path));return `<label>${label}</label>${lines>1?`<textarea rows="${lines}" onchange="set('${path}',this.value)">${v}</textarea>`:`<input value="${v}" onchange="set('${path}',this.value)">`}`}
+function numField(label,path){return `<label>${label}</label><input type="number" value="${n(get(path))}" onchange="set('${path}',Number(this.value))">`}
+function badge(x,cls='info'){return `<span class="badge ${cls}">${esc(x)}</span>`}
+function listCards(list,card){return list.length?list.map(card).join(''):'<p class="muted">Nada cadastrado.</p>'}
+
+const views={
+ sessao(){return `<section class="card"><h2>Sessão</h2><div class="actions"><button class="blue" onclick="roll('1d20','d20')">Rolar d20</button><button class="gold" onclick="tab='preparar';render()">Preparar</button><button class="purple" onclick="nextRound()">Nova rodada</button><button class="green" onclick="toast('Salvo')">Salvar</button></div></section><section class="card"><h2>Alertas</h2><div class="badges">${alerts().map(a=>badge(a,'warn')).join('')||badge('Tudo limpo','ok')}</div></section><section class="card"><h2>Favoritos</h2>${listCards([...S.weapons.filter(x=>x.fav||x.equipped),...S.rituals.filter(x=>x.fav),...S.powers.filter(x=>x.fav)],favCard)}</section><section class="card"><h2>Histórico</h2>${S.logs.slice().reverse().slice(0,8).map(logCard).join('')||'<p class="muted">Sem rolagens.</p>'}</section>`},
+ ficha(){return `<section class="card"><h2>Ficha</h2>${field('Nome','p.name')}${field('Classe','p.class')}${field('Trilha','p.trail')}${field('Origem','p.origin')}<div class="grid two">${numField('NEX','p.nex')}${numField('Nível','p.level')}</div>${field('Afinidade','p.affinity')}<h3>Status</h3><div class="grid two">${['pv','pvMax','pe','peMax','pd','pdMax','san','sanMax','def','rd','dt','move','load','loadMax'].map(k=>numField(k.toUpperCase(),'stats.'+k)).join('')}</div><h3>Atributos</h3><div class="grid two">${ATTRS.map(a=>numField(a,'attrs.'+a)).join('')}</div></section>`},
+ perfil(){return `<section class="card"><h2>Origem e Classe</h2>${field('Conceito','profile.concept',4)}${field('Poder da origem','profile.originPower',4)}${field('Perícias da origem','profile.originSkills',2)}${field('Habilidade de classe','profile.classAbility',4)}${field('Habilidades da trilha','profile.trailAbilities',5)}${field('Aparência','profile.appearance',4)}${field('Personalidade','profile.personality',4)}${field('Medo pessoal','profile.fear')}${field('Objetivo','profile.objective')}</section>`},
+ pericias(){return `<section class="card"><h2>Perícias</h2>${SKILLS.map(skillCard).join('')}</section>`},
+ armas(){return `<section class="card"><h2>Armas</h2><button class="green" onclick="addWeapon()">+ Arma</button>${listCards(S.weapons,weaponCard)}</section>`},
+ rituais(){return `<section class="card"><h2>Rituais</h2><button class="green" onclick="addRitual()">+ Ritual</button>${listCards(S.rituals,ritualCard)}</section>`},
+ poderes(){return `<section class="card"><h2>Poderes</h2><button class="green" onclick="addPower()">+ Poder</button>${listCards(S.powers,powerCard)}</section>`},
+ inventario(){return `<section class="card"><h2>Inventário</h2><button class="green" onclick="addItem()">+ Item</button>${listCards(S.items,itemCard)}</section>`},
+ defesa(){return `<section class="card"><h2>Proteções</h2><button class="green" onclick="addProtection()">+ Proteção</button>${listCards(S.protections,protectionCard)}</section><section class="card"><h2>Buffs</h2><button class="green" onclick="addBuff()">+ Buff</button>${listCards(S.buffs,buffCard)}</section>`},
+ condicoes(){return `<section class="card"><h2>Condições</h2><div class="actions"><button class="green" onclick="addCondition()">+ Condição</button><button class="blue" onclick="presetCondition()">Biblioteca</button></div>${listCards(S.conditions,conditionCard)}</section>`},
+ marcas(){return `<section class="card"><h2>Ferimentos</h2><button class="green" onclick="addRecord('injuries',{name:'Ferimento',type:'Físico',penalty:'',treatment:'',desc:''})">+ Ferimento</button>${listCards(S.injuries,x=>recordCard('injuries',x,['name','type','penalty','treatment','desc']))}</section><section class="card"><h2>Marcas</h2><button class="green" onclick="addRecord('marks',{name:'Marca',level:'',type:'',benefit:'',penalty:'',trigger:'',desc:''})">+ Marca</button>${listCards(S.marks,x=>recordCard('marks',x,['name','level','type','benefit','penalty','trigger','desc']))}</section><section class="card"><h2>Alterações de NEX</h2><button class="green" onclick="addRecord('nexChanges',{nex:'50',visual:'',mechanic:'',bonus:'',penalty:'',element:''})">+ Alteração</button>${listCards(S.nexChanges,x=>recordCard('nexChanges',x,['nex','visual','mechanic','bonus','penalty','element']))}</section>`},
+ investigacao(){return `<section class="card"><h2>Investigação</h2>${field('Missão','mission.name')}${field('Objetivo','mission.objective',3)}${field('Local','mission.location')}${field('Ameaça','mission.threat')}${field('NPCs','mission.npcs',4)}${field('Pistas','mission.clues',5)}${field('Documentos','mission.documents',4)}${field('Símbolos','mission.symbols',3)}${field('Suspeitos','mission.suspects',3)}${field('Perguntas','mission.questions',4)}${field('Teorias','mission.theories',4)}${field('Linha do tempo','mission.timeline',5)}${field('Relações','mission.relations',4)}</section>`},
+ preparar(){return `<section class="card"><h2>Preparar Ação</h2>${field('Título','prepare.title')}${field('Ação principal','prepare.mainAction')}${field('Movimento','prepare.moveAction')}${field('Livre','prepare.freeAction')}${field('Reação','prepare.reaction')}${field('Usar','prepare.use')}${field('Alvo','prepare.target')}<div class="grid two">${numField('PE','prepare.pe')}${numField('PD','prepare.pd')}${numField('PV','prepare.pv')}${numField('SAN','prepare.san')}</div>${field('Testes separados por ;','prepare.tests')}${field('Dano','prepare.damage')}${field('Condição aplicada','prepare.condition')}${field('Plano se falhar','prepare.failPlan',3)}${field('Notas','prepare.notes',4)}<div class="actions"><button class="green" onclick="executePrepared()">Executar tudo</button><button class="blue" onclick="copyPrepared()">Copiar</button></div></section><section class="card"><h2>Combos</h2><button class="green" onclick="addRecord('combos',{name:'Combo',requirements:'',buffs:'',actions:'',cost:'',tests:'',damage:'',risk:'',notes:''})">+ Combo</button>${listCards(S.combos,x=>recordCard('combos',x,['name','requirements','buffs','actions','cost','tests','damage','risk','notes']))}</section>`},
+ evolucao(){return `<section class="card"><h2>Evolução</h2><button class="green" onclick="addRecord('evolution',{from:'',to:'',level:'',power:'',attr:'',skills:'',ritual:'',notes:''})">+ Avanço</button>${listCards(S.evolution,x=>recordCard('evolution',x,['from','to','level','power','attr','skills','ritual','notes']))}</section><section class="card"><h2>Descanso</h2>${field('Último descanso','rest.lastRest')}${field('Ações de interlúdio','rest.interludeActions',5)}${field('Tratamento','rest.treatment',3)}${field('Fabricação','rest.crafting',3)}${field('Estudo','rest.study',3)}${field('Treino','rest.training',3)}<div class="actions"><button class="green" onclick="full('pv')">Recuperar PV</button><button class="blue" onclick="full('pe')">Recuperar PE</button><button class="gold" onclick="full('san')">Recuperar SAN</button></div></section>`},
+ validar(){return `<section class="card"><h2>Validador</h2>${alerts(true).map(a=>`<div class="item">${esc(a)}</div>`).join('')||'<p class="muted">Nenhum problema encontrado.</p>'}<h2>Resumo Mestre</h2><button class="blue" onclick="copy(masterSummary())">Copiar resumo</button><pre>${esc(masterSummary())}</pre></section>`},
+ backup(){return `<section class="card"><h2>Backups</h2><div class="actions"><button class="gold" onclick="backup('antes da sessão')">Antes da sessão</button><button class="gold" onclick="backup('antes do boss')">Antes do boss</button><button class="green" onclick="backup('após descanso')">Após descanso</button></div>${listCards(S.backups,backupCard)}</section>`},
+ json(){return `<section class="card"><h2>Importar / Exportar</h2><p class="muted">Carregue uma ficha por JSON ou cole uma ficha em texto. O importador tenta reconhecer automaticamente os campos principais.</p><h3>Importar JSON</h3><div class="actions"><label class="filebtn green" for="fileInput">Importar arquivo JSON</label><input id="fileInput" type="file" accept="application/json,.json" onchange="importJSONFile(event)"><button class="blue" onclick="exportJSONFile()">Exportar arquivo JSON</button><button class="gold" onclick="copy(JSON.stringify(S,null,2))">Copiar JSON</button></div><label>Colar JSON manualmente</label><textarea id="jsonText" rows="7" placeholder="Cole aqui um JSON como Naloi.json"></textarea><button class="blue" onclick="importJSONText(document.getElementById('jsonText').value)">Importar JSON colado</button><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h3>Importar Texto</h3><p class="muted">Cole uma ficha em texto. Funciona melhor com campos como Nome, Classe, Trilha, NEX, PV, PE, atributos, ataques, rituais, poderes e itens.</p><label>Ficha em texto</label><textarea id="plainFichaText" rows="14" placeholder="Nome: Naloi\nClasse: Combatente\nTrilha: Vetor Temporal\nNEX: 60\nNível: 11\nPV: 82/82\nPE: 44/44\nPD: 58/58\nSAN: 42/42\nAgilidade: 4\nForça: 2\nAtaque: Manoplas de Combate\nTeste: 4d20+0\nDano: 1d6\nRitual: Velocidade Mortal\nElemento: Morte\nCírculo: 2\nCusto: 3 PE"></textarea><div class="actions"><button class="green" onclick="importPlainText(document.getElementById('plainFichaText').value)">Importar texto</button><button class="gold" onclick="previewPlainText(document.getElementById('plainFichaText').value)">Pré-visualizar</button></div><div id="textImportPreview"></div></section>`},
+ config(){return `<section class="card"><h2>Config</h2>${Object.keys(OPT).map(k=>`<label class="checkline"><input type="checkbox" ${opt(k)?'checked':''} onchange="S.optional.${k}=this.checked;render()"> ${OPT[k]}</label>`).join('')}<label>Elemento visual</label><select onchange="S.p.theme=this.value;render()"><option value="sangue" ${S.p.theme==='sangue'?'selected':''}>Sangue</option><option value="morte" ${S.p.theme==='morte'?'selected':''}>Morte</option><option value="conhecimento" ${S.p.theme==='conhecimento'?'selected':''}>Conhecimento</option><option value="energia" ${S.p.theme==='energia'?'selected':''}>Energia</option></select><div class="actions"><button class="green" onclick="toast('Salvo')">Salvar</button><button class="danger" onclick="resetAll()">Resetar</button></div></section>`}
+};
+
+function skillCard(name){const sk=S.skills[name],total=n(sk.train)+n(sk.bonus)+n(sk.temp),dice=Math.max(1,n(S.attrs[sk.attr])+n(sk.dice));return `<div class="item"><div class="title">${name} ${badge('+'+total,'info')}</div><p class="meta">${sk.attr} • ${dice}d20 • treino ${sk.train} • bônus ${sk.bonus} • temp ${sk.temp}</p><div class="mini"><button class="blue" onclick="roll('${dice}d20+${total}','Teste de ${name}')">Rolar</button><button onclick="editSkill('${name}')">Editar</button></div></div>`}
+function weaponCard(w){return `<div class="item"><div class="title">${esc(w.name)} ${w.fav?badge('fav','ok'):''}</div><p class="meta">${esc(w.test)} • ${esc(w.damage)} • ${esc(w.type)} • Mun ${w.ammo}/${w.ammoMax}</p><p class="desc">Crítico ${esc(w.crit)} • ${esc(w.skill)} / ${esc(w.attr)}\nMods: ${esc(w.mods||'')} ${w.curses?'• Maldições: '+esc(w.curses):''}</p><div class="mini"><button class="blue" onclick="roll('${esc(w.test)}','Ataque: ${esc(w.name)}')">Ataque</button><button class="gold" onclick="roll('${esc(w.damage)}','Dano: ${esc(w.name)}',true)">Dano</button><button onclick="wAmmo('${w.id}',-1)">Mun -1</button><button onclick="toggleFav('weapons','${w.id}')">Fav</button><button onclick="editGeneric('weapons','${w.id}',['name','skill','attr','test','damage','type','crit','range','category','ammo','ammoMax','mods','curses','notes'])">Editar</button></div></div>`}
+function ritualCard(r){return `<div class="item"><div class="title">${esc(r.name)} ${r.fav?badge('fav','ok'):''}</div><p class="meta">${esc(r.element)} • ${esc(r.circle)}º • ${esc(r.cost)} • ${r.sustain?badge('sustentado','warn'):''}</p><p class="desc">${esc(r.desc||'')}</p><div class="mini"><button class="blue" onclick="toast('${esc(r.name)} conjurado')">Conjurar</button>${r.damage?`<button class="gold" onclick="roll('${esc(r.damage)}','Dano ritual: ${esc(r.name)}',true)">Dano</button>`:''}<button onclick="rToggle('${r.id}')">Sustentar</button><button onclick="toggleFav('rituals','${r.id}')">Fav</button><button onclick="editGeneric('rituals','${r.id}',['name','element','circle','execution','range','target','duration','resistance','cost','discente','verdadeiro','sustainCost','components','damage','desc'])">Editar</button></div></div>`}
+function powerCard(p){return `<div class="item"><div class="title">${esc(p.name)} ${p.fav?badge('fav','ok'):''}</div><p class="meta">${esc(p.type)} • ${esc(p.cost)} • ${esc(p.action)}</p><p class="desc">${esc(p.desc||'')}</p><div class="mini"><button class="blue" onclick="toast('${esc(p.name)} usado')">Usar</button><button onclick="toggleFav('powers','${p.id}')">Fav</button><button onclick="editGeneric('powers','${p.id}',['name','type','prereq','cost','action','uses','desc'])">Editar</button></div></div>`}
+function itemCard(i){return `<div class="item"><div class="title">${esc(i.name)}</div><p class="meta">${esc(i.type)} • Qtd ${i.qty} • Carga ${i.load} • Usos ${i.uses}</p><p class="desc">${esc(i.desc||'')}</p><div class="mini"><button onclick="useItem('${i.id}')">Usar</button><button onclick="editGeneric('items','${i.id}',['name','type','qty','load','uses','patent','desc'])">Editar</button></div></div>`}
+function protectionCard(p){return `<div class="item"><div class="title">${esc(p.name)} ${p.equipped?badge('equipado','ok'):''}</div><p class="meta">Def +${p.def} • RD +${p.rd} • ${esc(p.type||'')}</p><p class="desc">${esc(p.desc||'')}</p><div class="mini"><button onclick="p.equipped=!p.equipped;render()">Equipar</button><button onclick="editGeneric('protections','${p.id}',['name','def','rd','penalty','type','desc'])">Editar</button></div></div>`}
+function buffCard(b){return `<div class="item"><div class="title">${esc(b.name)} ${b.active?badge('ativo','ok'):badge('off')}</div><p class="meta">Def +${b.def} • RD +${b.rd} • Duração ${b.dur}</p><div class="mini"><button onclick="b.active=!b.active;render()">Ativar</button><button onclick="editGeneric('buffs','${b.id}',['name','dur','atkBonus','atkDice','dmgExtra','def','rd','dt','skill','skillBonus','desc'])">Editar</button></div></div>`}
+function conditionCard(c){return `<div class="item"><div class="title">${esc(c.name)}</div><p class="meta">Duração ${c.dur}</p><p class="desc">${esc(c.effect||'')}</p><div class="mini"><button onclick="c.dur=Math.max(0,n(c.dur)-1);if(c.dur==0)S.conditions=S.conditions.filter(x=>x.id!=='${c.id}');render()">-1</button><button onclick="editGeneric('conditions','${c.id}',['name','dur','effect','def','skill','skillMod'])">Editar</button></div></div>`}
+function recordCard(list,x,keys){return `<div class="item"><div class="title">${esc(x.name||x.nex||'Registro')}</div><p class="desc">${keys.slice(1).map(k=>x[k]?`${k}: ${x[k]}`:'').filter(Boolean).join('\n')}</p><div class="mini"><button onclick="editGeneric('${list}','${x.id}',${JSON.stringify(keys).replaceAll('"',"'")})">Editar</button><button class="danger" onclick="remove('${list}','${x.id}')">Excluir</button></div></div>`}
+function favCard(x){if(x.test)return weaponCard(x); if(x.circle!==undefined)return ritualCard(x); return powerCard(x)}
+function backupCard(b){return `<div class="item"><div class="title">${esc(b.label)}</div><p class="meta">${esc(b.time)}</p><button class="green" onclick="restoreBackup('${b.id}')">Restaurar</button><button class="danger" onclick="remove('backups','${b.id}')">Excluir</button></div>`}
+function logCard(l){return `<div class="item"><b>${esc(l.title)}</b><br><span class="muted">${esc(l.text)}</span><br><small class="muted">${esc(l.time)}</small></div>`}
+
+function addWeapon(){S.weapons.push({id:id('w'),name:'Nova Arma',skill:'Luta',attr:'Força',test:'1d20+0',damage:'1d6',type:'Impacto',crit:'20/x2',range:'',category:'',ammo:0,ammoMax:0,mods:'',curses:'',fav:false,equipped:true,notes:''});render()}
+function addRitual(){S.rituals.push({id:id('r'),name:'Novo Ritual',element:'Sangue',circle:'1',execution:'',range:'',target:'',duration:'',resistance:'',cost:'1 PE',discente:'',verdadeiro:'',sustainCost:'',components:'',damage:'',desc:'',fav:false,sustain:false});render()}
+function addPower(){S.powers.push({id:id('p'),name:'Novo Poder',type:'Classe',prereq:'',cost:'',action:'',uses:'',desc:'',fav:false});render()}
+function addItem(){S.items.push({id:id('i'),name:'Novo Item',type:'Equipamento',qty:'1',load:'0',uses:'0',patent:'',desc:'',fav:false});render()}
+function addProtection(){S.protections.push({id:id('pr'),name:'Proteção',def:'0',rd:'0',penalty:'',type:'',equipped:false,desc:''});render()}
+function addBuff(){S.buffs.push({id:id('b'),name:'Buff',active:true,dur:'3',atkBonus:'0',atkDice:'0',dmgExtra:'',def:'0',rd:'0',dt:'0',skill:'',skillBonus:'0',desc:''});render()}
+function addCondition(){S.conditions.push({id:id('c'),name:'Sangrando',dur:'3',effect:'Perde PV no início do turno.',def:'0',skill:'',skillMod:'0'});render()}
+function addRecord(list,obj){obj.id=id(list);S[list].push(obj);render()}
+function remove(list,idv){S[list]=S[list].filter(x=>x.id!==idv);render()}
+function toggleFav(list,idv){let x=S[list].find(x=>x.id===idv);x.fav=!x.fav;render()}
+function wAmmo(idv,delta){let w=S.weapons.find(x=>x.id===idv);w.ammo=Math.max(0,n(w.ammo)+delta);render()}
+function rToggle(idv){let r=S.rituals.find(x=>x.id===idv);r.sustain=!r.sustain;render()}
+function useItem(idv){let i=S.items.find(x=>x.id===idv),u=n(i.uses); if(u<=0)return toast('Sem usos disponíveis.'); i.uses=String(u-1);toast('Item usado.');render()}
+function full(k){S.stats[k]=S.stats[k+'Max'];render()}
+function editSkill(name){let sk=S.skills[name];openEditor('Editar '+name,{attr:sk.attr,train:sk.train,bonus:sk.bonus,temp:sk.temp,dice:sk.dice},v=>{S.skills[name]={attr:v.attr||skillAttr(name),train:n(v.train),bonus:n(v.bonus),temp:n(v.temp),dice:n(v.dice)};render()})}
+function editGeneric(list,idv,keys){let x=S[list].find(a=>a.id===idv);let vals={};keys.forEach(k=>vals[k]=x[k]??'');openEditor('Editar',vals,v=>{keys.forEach(k=>x[k]=v[k]);render()})}
+function openEditor(title,vals,cb){modalBg.classList.add('show');modal.innerHTML=`<h2>${esc(title)}</h2>${Object.keys(vals).map(k=>`<label>${k}</label><textarea data-k="${esc(k)}">${esc(vals[k])}</textarea>`).join('')}<div class="actions"><button class="green" id="okEdit">Salvar</button><button class="danger" onclick="closeModal()">Cancelar</button></div>`;document.getElementById('okEdit').onclick=()=>{let out={};modal.querySelectorAll('[data-k]').forEach(el=>out[el.dataset.k]=el.value);closeModal();cb(out)}}
+function closeModal(){modalBg.classList.remove('show')}
+
+function roll(exp,title,damage=false){let r=rollExpr(exp,!damage);log(title,`${exp} = ${r.total} — ${r.detail}`);showRoll(title,exp,r);render()}
+function detectDice(text){let m=String(text||'').match(/\d+d\d+(?:[+\-]\d+)?/i);return m?m[0]:''}
+function rollExpr(exp,test=true){const parts=String(exp||'0').toLowerCase().replace(/\s/g,'').replace(/−/g,'-').match(/[+-]?[^+-]+/g)||['0'];let total=0,detail=[];for(let part of parts){let sign=1;if(part[0]==='+')part=part.slice(1);else if(part[0]==='-'){sign=-1;part=part.slice(1)}let m=part.match(/^(\d*)d(\d+)$/);if(m){let q=n(m[1]||1),f=n(m[2]),rolls=[];for(let i=0;i<q;i++)rolls.push(1+Math.floor(Math.random()*f));let used=(test&&f===20)?Math.max(...rolls):rolls.reduce((a,b)=>a+b,0);total+=sign*used;detail.push(`${sign<0?'-':''}${q}d${f}[${rolls.join(',')}]${test&&f===20?' maior '+used:''}`)}else{let v=n(part);total+=sign*v;detail.push(`${sign<0?'-':''}${v}`)}}return{total,detail:detail.join(' + ').replace(/\+ -/g,'- ')}}
+function showRoll(title,exp,r){rollPop.className='rollPop show';rollPop.innerHTML=`<div class="rpTitle">${esc(title)}</div><div class="rpResult">${r.total}</div><div class="rpDetail">${esc(exp)} • ${esc(r.detail)}</div><div class="actions" style="margin-top:10px"><button onclick="rollPop.classList.remove('show')">Fechar</button></div>`;clearTimeout(window.rtimer);window.rtimer=setTimeout(()=>rollPop.classList.remove('show'),5200)}
+function log(title,text){S.logs.push({title,text,time:new Date().toLocaleString('pt-BR')});if(S.logs.length>160)S.logs.shift()}
+function alerts(full=false){let a=[];if(S.stats.pv<=0)a.push('PV zerado');else if(S.stats.pv<=S.stats.pvMax/2)a.push('PV baixo');if(!opt('semSanidade')&&S.stats.san<=S.stats.sanMax/3)a.push('SAN crítica');if(S.stats.load>S.stats.loadMax)a.push('Carga acima do limite');S.weapons.forEach(w=>{if(n(w.ammoMax)>0&&n(w.ammo)<=2)a.push('Munição baixa: '+w.name);if(full&&String(w.damage||'').trim()==='')a.push('Arma sem dano: '+w.name)});S.rituals.forEach(r=>{if(full&&String(r.cost||'').trim()==='')a.push('Ritual sem custo: '+r.name)});S.powers.forEach(p=>{if(full&&String(p.desc||'').trim()==='')a.push('Poder sem descrição: '+p.name)});return a}
+function nextRound(){S.turn.round++;S.turn.peSpent=0;S.turn.pdSpent=0;S.conditions=[...S.conditions].filter(c=>{let d=n(c.dur);if(d>0)c.dur=String(d-1);return c.dur!=='0'});log('Rodada','Nova rodada.');render()}
+function executePrepared(){['pe','pd','pv','san'].forEach(k=>S.stats[k]=Math.max(0,n(S.stats[k])-n(S.prepare[k])));String(S.prepare.tests||'').split(';').map(x=>x.trim()).filter(Boolean).forEach(t=>roll(t,'Teste preparado'));if(String(S.prepare.damage||'').trim())roll(S.prepare.damage,'Dano preparado',true);toast('Ação executada.');render()}
+function copyPrepared(){copy(`Plano: ${S.prepare.title}\nAção: ${S.prepare.mainAction}\nUsar: ${S.prepare.use}\nAlvo: ${S.prepare.target}\nCusto PE ${S.prepare.pe} PD ${S.prepare.pd}\nTestes: ${S.prepare.tests}\nDano: ${S.prepare.damage}\nNotas: ${S.prepare.notes}`)}
+function masterSummary(){const st=derived();return `${S.p.name}\n${S.p.class}/${S.p.trail} • NEX ${S.p.nex}% / Nível ${S.p.level}\nPV ${st.pv}/${st.pvMax} | PE ${st.pe}/${st.peMax} | PD ${st.pd}/${st.pdMax} | SAN ${st.san}/${st.sanMax}\nDef ${st.def} | RD ${st.rd} | DT ${st.dt}\nCondições: ${S.conditions.map(c=>c.name).join(', ')||'nenhuma'}\nAção preparada: ${S.prepare.title||S.prepare.use||'nenhuma'}`}
+function backup(label){S.backups.push({id:id('bk'),label,time:new Date().toLocaleString('pt-BR'),data:JSON.stringify(S)});render();toast('Backup criado')}
+function restoreBackup(idv){let b=S.backups.find(x=>x.id===idv);let keep=S.backups;S=merge(blank(),JSON.parse(b.data));S.backups=keep;render()}
+function exportJSONFile(){let filename=(S.p.name||'ficha').replace(/\W+/g,'_')+'_central_player.json';let content=JSON.stringify(S,null,2);if(window.Android&&Android.saveJson){Android.saveJson(filename,content);return}let blob=new Blob([content],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url)}
+
+function previewPlainText(txt){
+  try{
+    const imported=smartImportText(txt);
+    const p=imported.p||{}, s=imported.stats||{};
+    const weapons=imported.weapons||[], rituals=imported.rituals||[], powers=imported.powers||[], items=imported.items||[];
+    const el=document.getElementById('textImportPreview');
+    if(el)el.innerHTML=`<div class="item"><div class="title">Pré-visualização</div><p class="meta">${esc(p.name||'Sem nome')} • ${esc(p.class||'Sem classe')} • ${esc(p.trail||'Sem trilha')} • NEX ${esc(p.nex||'—')}%</p><div class="badges">${badge('PV '+(s.pv||0)+'/'+(s.pvMax||0),'info')}${badge('PE '+(s.pe||0)+'/'+(s.peMax||0),'info')}${badge('PD '+(s.pd||0)+'/'+(s.pdMax||0),'info')}${badge('SAN '+(s.san||0)+'/'+(s.sanMax||0),'info')}</div><p class="meta">Armas: ${weapons.length} • Rituais: ${rituals.length} • Poderes: ${powers.length} • Itens: ${items.length}</p></div>`;
+  }catch(e){toast('Erro na prévia: '+e.message)}
+}
+
+function importPlainText(txt){
+  try{
+    if(!String(txt||'').trim())return toast('Cole uma ficha em texto primeiro.');
+    S=merge(blank(),smartImportText(txt));
+    render();
+    toast('Ficha em texto importada.');
+  }catch(e){toast('Erro ao importar texto: '+e.message)}
+}
+
+function smartImportText(txt){
+  const b=blank();
+  const text=String(txt||'').replace(/\r/g,'').trim();
+  const val=(labels)=>{
+    for(const label of labels){
+      const rx=new RegExp('(?:^|\\n)\\s*'+label+'\\s*[:\\-]\\s*([^\\n]+)','i');
+      const m=text.match(rx); if(m)return m[1].trim();
+    }
+    return '';
+  };
+  const pair=(labels)=>{
+    for(const label of labels){
+      const rx=new RegExp('(?:^|\\n)\\s*'+label+'\\s*[:\\-]?\\s*(\\d+)\\s*\\/\\s*(\\d+)','i');
+      const m=text.match(rx); if(m)return [Number(m[1]),Number(m[2])];
+    }
+    return null;
+  };
+  const intv=(labels)=>{
+    for(const label of labels){
+      const rx=new RegExp('(?:^|\\n)\\s*'+label+'\\s*[:\\-]?\\s*(\\d+)','i');
+      const m=text.match(rx); if(m)return Number(m[1]);
+    }
+    return 0;
+  };
+  const attrAlias={agi:'Agilidade',agilidade:'Agilidade',for:'Força',forca:'Força','força':'Força',int:'Intelecto',intelecto:'Intelecto',pre:'Presença',presenca:'Presença','presença':'Presença',vig:'Vigor',vigor:'Vigor'};
+  const attrName=x=>attrAlias[String(x||'').toLowerCase()]||String(x||'Força');
+
+  b.p.name=val(['Nome','Name','Personagem'])||b.p.name;
+  b.p.class=val(['Classe','Class'])||b.p.class;
+  b.p.trail=val(['Trilha','Trail'])||b.p.trail;
+  b.p.origin=val(['Origem','Origin'])||b.p.origin;
+  b.p.affinity=val(['Afinidade','Affinity'])||b.p.affinity;
+  b.p.nex=intv(['NEX'])||b.p.nex;
+  b.p.level=intv(['Nível','Nivel','Level'])||Math.max(1,Math.ceil(Number(b.p.nex||5)/5));
+  if(String(b.p.affinity).toLowerCase().includes('energia'))b.p.theme='energia';
+  if(String(b.p.affinity).toLowerCase().includes('morte'))b.p.theme='morte';
+  if(String(b.p.affinity).toLowerCase().includes('conhecimento'))b.p.theme='conhecimento';
+  if(String(b.p.affinity).toLowerCase().includes('sangue'))b.p.theme='sangue';
+
+  const pv=pair(['PV','Pontos de Vida']); if(pv){b.stats.pv=pv[0];b.stats.pvMax=pv[1];}
+  const pe=pair(['PE','Pontos de Esforço','Pontos de Esforco']); if(pe){b.stats.pe=pe[0];b.stats.peMax=pe[1];}
+  const pd=pair(['PD','Pontos de Determinação','Pontos de Determinacao']); if(pd){b.stats.pd=pd[0];b.stats.pdMax=pd[1];}
+  const san=pair(['SAN','Sanidade']); if(san){b.stats.san=san[0];b.stats.sanMax=san[1];}
+  const def=intv(['Defesa','DEF']); if(def)b.stats.def=def;
+  const rd=intv(['RD']); if(rd)b.stats.rd=rd;
+  const dt=intv(['DT']); if(dt)b.stats.dt=dt;
+  const mov=intv(['Movimento','Deslocamento','Mov']); if(mov)b.stats.move=mov;
+
+  ATTRS.forEach(a=>{const plain=a.normalize('NFD').replace(/[\u0300-\u036f]/g,''); const v=intv([a,plain]); if(v)b.attrs[a]=v;});
+
+  SKILLS.forEach(skill=>{
+    const safe=skill.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const m=text.match(new RegExp('(?:^|\\n)\\s*'+safe+'\\s*[:\\-]?\\s*\\+?(\\d+)','i'));
+    if(m)b.skills[skill]={...b.skills[skill],bonus:Number(m[1])};
+    const m2=text.match(new RegExp('(?:^|\\n).*'+safe+'.*?(?:treino|grau|g)\\s*[:\\-]?\\s*\\+?(\\d+).*?(?:bonus|bônus|b)\\s*[:\\-]?\\s*\\+?(\\d+)','i'));
+    if(m2)b.skills[skill]={...b.skills[skill],train:Number(m2[1]),bonus:Number(m2[2])};
+  });
+
+  const valIn=(body,labels)=>{
+    for(const label of labels){
+      const rx=new RegExp('(?:^|\\n)\\s*'+label+'\\s*[:\\-]\\s*([^\\n]+)','i');
+      const m=body.match(rx); if(m)return m[1].trim();
+    }
+    return '';
+  };
+  const blocks=(labels)=>{
+    const starts=labels.join('|');
+    const rx=new RegExp('(?:^|\\n)\\s*('+starts+')\\s*[:\\-]\\s*([^\\n]+)([\\s\\S]*?)(?=\\n\\s*(?:Ataque|Arma|Ritual|Poder|Habilidade|Item|Equipamento|Proteção|Protecao)\\s*[:\\-]|$)','gi');
+    const out=[]; let m; while((m=rx.exec(text))!==null)out.push({kind:m[1],name:m[2].trim(),body:m[3]||''}); return out;
+  };
+
+  const attacks=blocks(['Ataque','Arma']);
+  b.weapons=attacks.map(bl=>{
+    const body=bl.body, skill=valIn(body,['Perícia','Pericia','Skill'])||'Luta', attr=attrName(valIn(body,['Atributo','Attr'])||'Força');
+    return {id:id('w'),name:bl.name,skill,attr,test:valIn(body,['Teste','Ataque','Rolagem'])||'1d20+0',damage:valIn(body,['Dano','Damage'])||detectDice(body)||'1d6',type:valIn(body,['Tipo','Tipo de dano'])||'Impacto',crit:valIn(body,['Crítico','Critico','Crit'])||'20/x2',range:valIn(body,['Alcance','Range'])||'',category:valIn(body,['Categoria','Cat'])||'',ammo:Number(valIn(body,['Munição','Municao','Ammo'])||0),ammoMax:Number(valIn(body,['Munição máxima','Municao maxima','AmmoMax'])||0),mods:valIn(body,['Modificações','Modificacoes','Mods'])||'',curses:valIn(body,['Maldições','Maldicoes'])||'',fav:true,equipped:true,notes:valIn(body,['Descrição','Descricao','Notas','Notes'])||''};
+  });
+  if(!b.weapons.length)b.weapons=blank().weapons;
+
+  b.rituals=blocks(['Ritual']).map(bl=>{const body=bl.body, desc=valIn(body,['Descrição','Descricao','Efeito'])||body.trim(); return {id:id('r'),name:bl.name,element:valIn(body,['Elemento','Element'])||'',circle:valIn(body,['Círculo','Circulo','Circle'])||'',execution:valIn(body,['Execução','Execucao','Execution'])||'',range:valIn(body,['Alcance','Range'])||'',target:valIn(body,['Alvo','Área','Area','Target'])||'',duration:valIn(body,['Duração','Duracao','Duration'])||'',resistance:valIn(body,['Resistência','Resistencia','Resistance'])||'',cost:valIn(body,['Custo','PE','Cost'])||'',damage:valIn(body,['Dano','Damage'])||detectDice(desc),desc,fav:false,sustain:false};});
+  b.powers=blocks(['Poder','Habilidade']).map(bl=>{const body=bl.body; return {id:id('p'),name:bl.name,type:valIn(body,['Tipo','Categoria','Type'])||bl.kind,prereq:valIn(body,['Pré-requisito','Pre-requisito','Prereq'])||'',cost:valIn(body,['Custo','Cost'])||'',action:valIn(body,['Ação','Acao','Action'])||'',uses:valIn(body,['Usos','Uses'])||'',desc:valIn(body,['Descrição','Descricao','Efeito'])||body.trim(),fav:false};});
+  blocks(['Item','Equipamento','Proteção','Protecao']).forEach(bl=>{const body=bl.body, cat=valIn(body,['Tipo','Categoria','Cat'])||bl.kind; if(bl.kind.toLowerCase().includes('prote')){b.protections.push({id:id('pr'),name:bl.name,type:cat,def:Number(valIn(body,['Defesa','Def'])||0),rd:Number(valIn(body,['RD'])||0),penalty:valIn(body,['Penalidade'])||'',equipped:true,desc:valIn(body,['Descrição','Descricao'])||body.trim()});}else{b.items.push({id:id('i'),name:bl.name,type:cat,qty:valIn(body,['Qtd','Quantidade'])||'1',load:valIn(body,['Carga','Peso','Espaços','Espacos'])||'0',uses:valIn(body,['Usos','Uses'])||'0',patent:valIn(body,['Patente'])||'',desc:valIn(body,['Descrição','Descricao'])||body.trim(),fav:false});}});
+  return b;
+}
+
+function importJSONFile(ev){let f=ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>importJSONText(r.result);r.readAsText(f);ev.target.value=''}
+function importJSONText(txt){try{S=merge(blank(),smartImport(JSON.parse(txt)));render();toast('Ficha importada.')}catch(e){toast('JSON inválido: '+e.message)}}
+function smartImport(j){
+ if(j.p||j.weapons||j.rituals||j.powers||j.items)return j;
+
+ let b=blank();
+
+ const pick=(obj,keys,fb='')=>{for(const k of keys){if(obj&&obj[k]!==undefined&&obj[k]!==null&&String(obj[k]).trim()!=='')return obj[k]}return fb};
+ const toNum=v=>Number(v||0);
+ const attrAlias={agi:'Agilidade',agilidade:'Agilidade',for:'Força','força':'Força',forca:'Força',int:'Intelecto',intelecto:'Intelecto',pre:'Presença','presença':'Presença',presenca:'Presença',vig:'Vigor',vigor:'Vigor'};
+ const attrName=v=>attrAlias[String(v||'').toLowerCase()]||String(v||'Força');
+
+ b.p.name=pick(j,['nome','name','personagem','character'],b.p.name);
+ b.p.class=pick(j,['classe','class'],b.p.class);
+ b.p.trail=pick(j,['trilha','trail'],b.p.trail);
+ b.p.origin=pick(j,['origem','origin'],b.p.origin);
+ b.p.nex=toNum(pick(j,['nex','NEX','_lastNex'],b.p.nex));
+ b.p.level=toNum(pick(j,['nivel','nível','level','_lastNivel'],Math.max(1,Math.ceil(b.p.nex/5))));
+ b.p.affinity=pick(j,['afinidade','affinity'],b.p.affinity);
+ b.p.image=pick(j,['avt','avatar','image','imagem'],b.p.image);
+ if(String(b.p.affinity).toLowerCase().includes('energia'))b.p.theme='energia';
+ if(String(b.p.affinity).toLowerCase().includes('morte'))b.p.theme='morte';
+ if(String(b.p.affinity).toLowerCase().includes('conhecimento'))b.p.theme='conhecimento';
+ if(String(b.p.affinity).toLowerCase().includes('sangue'))b.p.theme='sangue';
+
+ b.profile.appearance=pick(j,['aparencia','aparência','appearance'],'');
+ b.profile.objective=pick(j,['objetivo','objective'],'');
+ b.profile.concept=pick(j,['back','background','historia','história'],'');
+ b.mission.clues=pick(j,['note','notas','notes'],'');
+
+ b.optional.semSanidade=!!j._modoSemSanidade;
+ b.optional.nexNivel=!!j._modoSobrevivendoAoHorror;
+ b.optional.municao=true;
+
+ const st=j.stats||j.status||{};
+ b.stats.pv=toNum(pick(st,['pvA','pvAtual','pv','vida'],b.stats.pv));
+ b.stats.pvMax=toNum(pick(st,['pvM','pvMax','vidaMax','_autoPvM'],b.stats.pvMax));
+ b.stats.pe=toNum(pick(st,['peA','peAtual','pe'],b.stats.pe));
+ b.stats.peMax=toNum(pick(st,['peM','peMax','_autoPeM'],b.stats.peMax));
+ b.stats.pd=toNum(pick(st,['pdA','pdAtual','pd'],b.stats.pd));
+ b.stats.pdMax=toNum(pick(st,['pdM','pdMax','_autoPdM'],b.stats.pdMax));
+ b.stats.san=toNum(pick(st,['sanA','sanAtual','san','sanidade'],b.stats.san));
+ b.stats.sanMax=toNum(pick(st,['sanM','sanMax','sanidadeMax','_autoSanM'],b.stats.sanMax));
+ const agiFromArray=Array.isArray(j.attr)?toNum(j.attr[0]):0;
+ b.stats.def=10+agiFromArray+toNum(pick(st,['defEq'],0))+toNum(pick(st,['defOu'],0));
+ b.stats.rd=toNum(pick(st,['rd','resistencia'],0));
+ b.stats.dt=toNum(pick(st,['dt','dtRitual'],10+Math.floor(b.p.nex/5)));
+
+ if(Array.isArray(j.attr)){
+   // Formato usado por estas fichas: [Agilidade, Força, Intelecto, Presença, Vigor]
+   b.attrs.Agilidade=j.attr[0]??b.attrs.Agilidade;
+   b.attrs.Força=j.attr[1]??b.attrs.Força;
+   b.attrs.Intelecto=j.attr[2]??b.attrs.Intelecto;
+   b.attrs.Presença=j.attr[3]??b.attrs.Presença;
+   b.attrs.Vigor=j.attr[4]??b.attrs.Vigor;
+ }else{
+   const at=j.atributos||j.attrs||{};
+   ATTRS.forEach(a=>{if(at[a]!=null)b.attrs[a]=toNum(at[a])});
+ }
+
+ const sk=j.skills||j.pericias||{};
+ SKILLS.forEach(name=>{
+   const val=sk[name];
+   if(val&&typeof val==='object'){
+     b.skills[name]={...b.skills[name],train:toNum(val.g??val.train??val.treino??0),bonus:toNum(val.b??val.bonus??0),temp:toNum(val.temp??0)};
+   }else if(val!=null){
+     b.skills[name]={...b.skills[name],train:toNum(val)};
+   }
+ });
+
+ const skillTotal=name=>{
+   const s=b.skills[name]||{train:0,bonus:0,temp:0};
+   return toNum(s.train)+toNum(s.bonus)+toNum(s.temp);
+ };
+ const attrDice=a=>Math.max(1,toNum(b.attrs[attrName(a)]||1));
+
+ const convertAttack=a=>{
+   const skName=pick(a,['skill','pericia','perícia'],'Luta');
+   const attr=attrName(pick(a,['atributo','attr'],'for'));
+   const dice=attrDice(attr);
+   const bonus=skillTotal(skName)+toNum(pick(a,['atkBonus','customAtkBonus'],0));
+   let dmg=pick(a,['dano','damage','dmg'],'1d6');
+   const dmgBonus=toNum(pick(a,['dmgBonus','customDmgBonus'],0));
+   const extra=pick(a,['extraDamage','danoExtra'],'');
+   if(dmgBonus)dmg+='+'+dmgBonus;
+   if(extra)dmg+='+'+extra;
+   const mods=[...(Array.isArray(a.mods)?a.mods:[]),...(Array.isArray(a.features)?a.features:[])].filter(Boolean).join(', ');
+   const malds=(Array.isArray(a.maldicoes)?a.maldicoes:[]).map(m=>`${m.nome||''}${m.elemento?' ('+m.elemento+')':''}`).join(', ');
+   return {
+     id:id('w'),
+     name:pick(a,['n','nome','name'],'Arma'),
+     skill:skName,
+     attr:attr,
+     test:`${dice}d20+${bonus}`,
+     damage:dmg,
+     type:pick(a,['tipo','type'],'Impacto'),
+     crit:`${pick(a,['margem','critThreat'],'20')}/${pick(a,['mult','critMult'],'x2')}`,
+     range:pick(a,['alcance','range'],''),
+     category:pick(a,['cat','category'],''),
+     ammo:toNum(pick(a,['municao','munição','ammo'],0)),
+     ammoMax:toNum(pick(a,['municaoMax','muniçãoMax','ammoMax'],0)),
+     mods:mods,
+     curses:malds,
+     fav:true,
+     equipped:a.emUso===true||a.equipped===true||a._fromInv!==undefined,
+     notes:pick(a,['desc','d','notes'],'')
+   };
+ };
+
+ b.weapons=(j.atk||j.ataques||j.attacks||[]).map(convertAttack);
+
+ const inv=Array.isArray(j.inv)?j.inv:(j.inventario||j.itens||j.items||[]);
+ inv.forEach(item=>{
+   const cat=pick(item,['itemCategoria','cat','categoria','type'],'Item');
+   const isWeapon=item.arma===true;
+   const isProtection=String(cat).toLowerCase().includes('prote')||item.def!==undefined;
+   const malds=(Array.isArray(item.maldicoes)?item.maldicoes:[]).map(m=>`${m.nome||''}${m.elemento?' ('+m.elemento+')':''}`).join(', ');
+   const mods=(Array.isArray(item.mod)?item.mod:[]).join(', ');
+   const desc=[pick(item,['d','desc','descricao','descrição'],''),mods?'Modificações: '+mods:'',malds?'Maldições: '+malds:''].filter(Boolean).join('\n');
+
+   if(isWeapon){
+     const exists=b.weapons.some(w=>w.name===pick(item,['n','nome','name'],'Arma'));
+     if(!exists)b.weapons.push(convertAttack(item));
+   }else if(isProtection){
+     b.protections.push({
+       id:id('pr'),
+       name:pick(item,['n','nome','name'],'Proteção'),
+       type:cat,
+       def:toNum(pick(item,['def'],0)),
+       rd:toNum(pick(item,['rd'],0)),
+       penalty:pick(item,['penalty','penalidade'],''),
+       equipped:item.emUso===true||item.equipado===true||true,
+       desc
+     });
+   }else{
+     b.items.push({
+       id:id('i'),
+       name:pick(item,['n','nome','name'],'Item'),
+       type:cat,
+       qty:'1',
+       load:String(pick(item,['p','peso','carga'],0)),
+       uses:String(pick(item,['usos','uses'],0)),
+       patent:pick(item,['cat','patente'],''),
+       desc,
+       fav:false
+     });
+   }
+ });
+
+ b.rituals=(j.rit||j.rituais||j.rituals||[]).map(r=>{
+   const desc=pick(r,['d','desc','descricao','descrição'],'');
+   return {
+     id:id('r'),
+     name:pick(r,['n','nome','name'],'Ritual'),
+     element:pick(r,['el','elemento','element'],''),
+     circle:pick(r,['c','circulo','círculo','circle'],''),
+     execution:pick(r,['execucao','execução','execution'],''),
+     range:pick(r,['alcance','range'],''),
+     target:pick(r,['alvo','target','area','área'],''),
+     duration:pick(r,['duracao','duração','duration'],''),
+     resistance:pick(r,['resistencia','resistência','resistance'],''),
+     cost:String(pick(r,['pe','custo','cost'],'')),
+     damage:detectDice(desc),
+     desc,
+     fav:false,
+     sustain:false
+   };
+ });
+
+ b.powers=(j.hab||j.poderes||j.habilidades||j.powers||[]).map(p=>({
+   id:id('p'),
+   name:pick(p,['n','nome','name'],'Poder'),
+   type:pick(p,['_categoria','_src','tipo','type'],'Habilidade'),
+   prereq:pick(p,['prereq','preRequisito','pré-requisito'],''),
+   cost:pick(p,['custo','cost'],''),
+   action:pick(p,['acao','ação','action'],''),
+   uses:pick(p,['usos','uses'],''),
+   desc:pick(p,['d','desc','descricao','descrição','effect','efeito'],''),
+   fav:false
+ }));
+
+ if(b.protections.length){
+   b.protections.forEach(p=>p.equipped=true);
+ }
+ if(!b.weapons.length)b.weapons=blank().weapons;
+
+ return b;
+}
+function copy(txt){navigator.clipboard?.writeText(txt);toast('Copiado.')}
+function toast(msg){const el=document.getElementById('toast');if(!el||!el.classList){console.log(msg);return}el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800)}
+function resetAll(){if(confirm('Resetar ficha?')){localStorage.removeItem(KEY);S=blank();render()}}
+window.onerror=(msg)=>{view.innerHTML=`<section class="card"><h2>Erro</h2><p class="bad">${esc(msg)}</p><button class="danger" onclick="localStorage.removeItem(KEY);location.reload()">Limpar save</button></section>`}
+
+/* ===== PATCH V2: revisão de importação, modos, cálculos automáticos e combos ===== */
+let pendingImport=null;
+
+function ensureAdvanced(){
+  S.ui={mode:'sessao', ...(S.ui||{})};
+  S.report={damageDealt:0,damageTaken:0,peSpent:0,pdSpent:0,rituals:0,attacks:0,items:0,conditions:0,notes:'', ...(S.report||{})};
+  S.sessionLog=Array.isArray(S.sessionLog)?S.sessionLog:[];
+  S.evolution=Array.isArray(S.evolution)?S.evolution:[];
+  S.nexChanges=Array.isArray(S.nexChanges)?S.nexChanges:[];
+  S.combos=Array.isArray(S.combos)?S.combos:[];
+  S.items=Array.isArray(S.items)?S.items:[];
+  S.protections=Array.isArray(S.protections)?S.protections:[];
+  S.conditions=Array.isArray(S.conditions)?S.conditions:[];
+  S.buffs=Array.isArray(S.buffs)?S.buffs:[];
+  S.weapons=Array.isArray(S.weapons)?S.weapons:[];
+  S.rituals=Array.isArray(S.rituals)?S.rituals:[];
+  S.powers=Array.isArray(S.powers)?S.powers:[];
+  for(const it of S.items){
+    if(it.equipped===undefined)it.equipped=false;
+    if(it.auto===undefined)it.auto=false;
+    if(it.def===undefined)it.def='0';
+    if(it.rd===undefined)it.rd='0';
+    if(it.skill===undefined)it.skill='';
+    if(it.skillBonus===undefined)it.skillBonus='0';
+    if(it.attr===undefined)it.attr='';
+    if(it.attrBonus===undefined)it.attrBonus='0';
+  }
+  for(const w of S.weapons){
+    if(w.autoCalc===undefined)w.autoCalc=true;
+    if(w.bonus===undefined)w.bonus='0';
+    if(w.extraDice===undefined)w.extraDice='0';
+    if(w.damageBonus===undefined)w.damageBonus='0';
+    if(w.critMult===undefined)w.critMult=(String(w.crit||'').match(/x(\d+)/i)||[])[1]||'2';
+  }
+  for(const c of S.conditions){
+    if(c.id===undefined)c.id=id('cond');
+  }
+  if(!TABS.some(t=>t[0]==='relatorio'))TABS.splice(Math.max(0,TABS.length-2),0,['relatorio','Relatório']);
+  if(!TABS.some(t=>t[0]==='importacao'))TABS.splice(Math.max(0,TABS.length-2),0,['importacao','Importação']);
+}
+
+function derived(){
+  ensureAdvanced();
+  applyRules();
+  const st={...S.stats};
+  const skillMods={};
+  const attrMods={};
+  SKILLS.forEach(k=>skillMods[k]=0);
+  ATTRS.forEach(k=>attrMods[k]=0);
+
+  S.protections.filter(x=>x.equipped).forEach(x=>{st.def+=n(x.def);st.rd+=n(x.rd)});
+  S.items.filter(x=>x.equipped&&x.auto).forEach(x=>{
+    st.def+=n(x.def); st.rd+=n(x.rd);
+    if(x.skill&&skillMods[x.skill]!=null)skillMods[x.skill]+=n(x.skillBonus);
+    if(x.attr&&attrMods[x.attr]!=null)attrMods[x.attr]+=n(x.attrBonus);
+  });
+  S.buffs.filter(x=>x.active).forEach(x=>{
+    st.def+=n(x.def); st.rd+=n(x.rd); st.dt+=n(x.dt);
+    if(x.skill&&skillMods[x.skill]!=null)skillMods[x.skill]+=n(x.skillBonus);
+  });
+  S.conditions.forEach(c=>{
+    st.def+=n(c.def); st.rd+=n(c.rd);
+    if(c.skill&&skillMods[c.skill]!=null)skillMods[c.skill]+=n(c.skillMod);
+  });
+  if(opt('alteracoesNex')){
+    S.nexChanges.filter(a=>(a.active!==false)&&(a.on!==false)&&n(S.p.nex)>=n(a.nex)).forEach(a=>{
+      st.pvMax+=n(a.pvMax); st.peMax+=n(a.peMax); st.pdMax+=n(a.pdMax); st.sanMax+=n(a.sanMax);
+      st.def+=n(a.def); st.rd+=n(a.rd); st.dt+=n(a.dt); st.move+=n(a.move);
+      if(a.skill&&skillMods[a.skill]!=null)skillMods[a.skill]+=n(a.skillMod);
+      if(a.attr&&attrMods[a.attr]!=null)attrMods[a.attr]+=n(a.attrMod);
+    });
+  }
+  st.load=calcCurrentLoad();
+  return { ...st, skillMods, attrMods };
+}
+
+function render(){
+  ensureAdvanced();
+  applyRules(); save();
+  document.body.className=S.p.theme||'sangue';
+  const st=derived();
+  avatar.textContent=initials(S.p.name); heroName.textContent=S.p.name;
+  heroClass.textContent=`${S.p.class} • ${S.p.trail}`; heroNex.textContent=`NEX ${S.p.nex}% • Nível ${S.p.level}`;
+  heroMode.textContent=S.ui.mode==='sessao'?'Modo Sessão':'Modo Edição';
+  quick.innerHTML=stat('PV',st.pv,st.pvMax,'')+(opt('semSanidade')?stat('PD',st.pd,st.pdMax,'blueFill'):stat('PE',st.pe,st.peMax,'blueFill')+stat('SAN',st.san,st.sanMax,'greenFill'))+`<div class="stat"><div class="statTop"><span class="statName">DEF/RD</span><span class="statValue">${st.def}/${st.rd}</span></div><p class="meta">DT ${st.dt} • Mov ${st.move}m • Carga ${st.load}/${st.loadMax}</p></div>`;
+  const sessionTabs=['sessao','pericias','armas','rituais','poderes','condicoes','preparar','investigacao','relatorio','json','config'];
+  const visible=S.ui.mode==='sessao'?TABS.filter(t=>sessionTabs.includes(t[0])):TABS;
+  if(!visible.some(t=>t[0]===tab))tab=visible[0][0];
+  nav.innerHTML=`<button class="purple" onclick="toggleMode()">${S.ui.mode==='sessao'?'Modo Sessão':'Modo Edição'}</button>`+visible.map(t=>`<button class="${tab===t[0]?'active':''}" onclick="tab='${t[0]}';render()">${t[1]}</button>`).join('');
+  view.innerHTML=(views[tab]||views.sessao)();
+}
+
+function toggleMode(){
+  ensureAdvanced();
+  S.ui.mode=S.ui.mode==='sessao'?'edicao':'sessao';
+  render();
+}
+
+function calcCurrentLoad(){
+  const itemLoad=S.items.reduce((sum,i)=>sum+n(i.load)*Math.max(1,n(i.qty||1)),0);
+  const protLoad=S.protections.reduce((sum,i)=>sum+n(i.load||0),0);
+  const weaponLoad=S.weapons.reduce((sum,i)=>sum+n(i.load||0),0);
+  return itemLoad+protLoad+weaponLoad;
+}
+
+function skillTotal(name){
+  const st=derived();
+  const s=S.skills[name]||{train:0,bonus:0,temp:0};
+  return n(s.train)+n(s.bonus)+n(s.temp)+n(st.skillMods?.[name]);
+}
+
+function attrDice(name){
+  const st=derived();
+  return Math.max(1,n(S.attrs[name])+n(st.attrMods?.[name]));
+}
+
+function autoWeaponTest(w){
+  if(w.autoCalc===false)return String(w.test||w.atk||'1d20+0');
+  const attr=w.attr||'Força';
+  const sk=w.skill||'Luta';
+  const dice=Math.max(1,attrDice(attr)+n(w.extraDice));
+  const bonus=skillTotal(sk)+n(w.bonus);
+  return `${dice}d20${bonus>=0?'+':''}${bonus}`;
+}
+
+function autoWeaponDamage(w){
+  let dmg=String(w.damage||w.dmg||'1d6').trim()||'1d6';
+  const st=derived();
+  if(n(w.damageBonus))dmg+=`${n(w.damageBonus)>=0?'+':''}${n(w.damageBonus)}`;
+  for(const b of S.buffs.filter(x=>x.active&&x.dmgExtra))dmg+='+'+b.dmgExtra;
+  return dmg.replace(/\+\+/g,'+');
+}
+
+function critDamage(exp, mult){
+  const m=n(mult||2)||2;
+  return Array.from({length:m},()=>`(${exp})`).join('+');
+}
+
+function weaponCard(w){
+  const atk=autoWeaponTest(w), dmg=autoWeaponDamage(w);
+  return `<div class="item"><div class="title">${esc(w.name)} ${w.fav?badge('fav','ok'):''} ${w.equipped?badge('equipada','ok'):''}</div><p class="meta">${esc(atk)} • ${esc(dmg)} • ${esc(w.type)} • Mun ${w.ammo}/${w.ammoMax}</p><p class="desc">Crítico ${esc(w.crit||('x'+(w.critMult||2)))} • ${esc(w.skill)} / ${esc(w.attr)}\nAuto: ${w.autoCalc===false?'não':'sim'} • Mods: ${esc(w.mods||'')} ${w.curses?'• Maldições: '+esc(w.curses):''}</p><div class="mini"><button class="blue" onclick="roll('${esc(atk)}','Ataque: ${esc(w.name)}')">Ataque</button><button class="gold" onclick="roll('${esc(dmg)}','Dano: ${esc(w.name)}',true);S.report.damageDealt+=0">Dano</button><button class="gold" onclick="roll('${esc(critDamage(dmg,w.critMult))}','Crítico: ${esc(w.name)}',true)">Crítico</button><button onclick="wAmmo('${w.id}',-1)">Mun -1</button><button onclick="toggleFav('weapons','${w.id}')">Fav</button><button onclick="toggleEquipWeapon('${w.id}')">${w.equipped?'Guardar':'Equipar'}</button><button onclick="editWeaponAuto('${w.id}')">Editar</button></div></div>`;
+}
+
+function toggleEquipWeapon(idv){
+  const w=S.weapons.find(x=>x.id===idv);
+  if(w)w.equipped=!w.equipped;
+  render();
+}
+
+function editWeaponAuto(idv){
+  const w=S.weapons.find(x=>x.id===idv); if(!w)return;
+  openEditor('Editar arma', {
+    name:w.name||'', skill:w.skill||'Luta', attr:w.attr||'Força',
+    autoCalc:String(w.autoCalc!==false), test:w.test||'', damage:w.damage||w.dmg||'1d6',
+    bonus:w.bonus||'0', extraDice:w.extraDice||'0', damageBonus:w.damageBonus||'0',
+    type:w.type||'', crit:w.crit||'', critMult:w.critMult||'2',
+    ammo:w.ammo||0, ammoMax:w.ammoMax||0, mods:w.mods||'', curses:w.curses||'', notes:w.notes||''
+  }, v=>{
+    Object.assign(w, v);
+    w.autoCalc=String(v.autoCalc).toLowerCase()!=='false';
+    w.ammo=n(v.ammo); w.ammoMax=n(v.ammoMax);
+    render();
+  });
+}
+
+function itemCard(item){
+  return `<div class="item"><div class="title">${esc(item.name)} ${item.equipped?badge('equipado','ok'):''} ${item.auto?badge('auto','info'):''}</div><p class="meta">${esc(item.type)} • Qtd ${item.qty} • Carga ${item.load} • Usos ${item.uses}</p><p class="desc">${esc(item.desc||'')}\nBônus: Def +${item.def||0} • RD +${item.rd||0} • ${item.skill||'sem perícia'} ${item.skillBonus||0}</p><div class="mini"><button onclick="useItem('${item.id}')">Usar</button><button onclick="toggleItemEquip('${item.id}')">${item.equipped?'Guardar':'Equipar'}</button><button onclick="editItemAuto('${item.id}')">Editar</button></div></div>`;
+}
+
+function toggleItemEquip(idv){
+  const i=S.items.find(x=>x.id===idv);
+  if(i)i.equipped=!i.equipped;
+  render();
+}
+
+function editItemAuto(idv){
+  const i=S.items.find(x=>x.id===idv); if(!i)return;
+  openEditor('Editar item', {name:i.name||'', type:i.type||'', qty:i.qty||'1', load:i.load||'0', uses:i.uses||'0', patent:i.patent||'', equipped:String(i.equipped===true), auto:String(i.auto===true), def:i.def||'0', rd:i.rd||'0', skill:i.skill||'', skillBonus:i.skillBonus||'0', attr:i.attr||'', attrBonus:i.attrBonus||'0', desc:i.desc||''}, v=>{
+    Object.assign(i,v);
+    i.equipped=String(v.equipped).toLowerCase()==='true';
+    i.auto=String(v.auto).toLowerCase()==='true';
+    render();
+  });
+}
+
+function protectionCard(p){
+  return `<div class="item"><div class="title">${esc(p.name)} ${p.equipped?badge('equipada','ok'):''}</div><p class="meta">Def +${p.def} • RD +${p.rd} • Carga ${p.load||0} • ${esc(p.type||'')}</p><p class="desc">${esc(p.desc||'')}</p><div class="mini"><button onclick="p.equipped=!p.equipped;render()">${p.equipped?'Desequipar':'Equipar'}</button><button onclick="editGeneric('protections','${p.id}',['name','def','rd','load','penalty','type','desc'])">Editar</button></div></div>`;
+}
+
+function addConditionPreset(){
+  const presets=['Morrendo','Enlouquecendo','Perturbado','Sangrando','Vulnerável','Desprevenido','Fraco','Debilitado','Cego','Surdo','Caído','Agarrado','Imóvel','Pasmo','Atordoado','Confuso','Exposto'];
+  const choice=prompt('Condição pronta:\n'+presets.join(', '),'Sangrando');
+  if(!choice)return;
+  const effects={
+    Morrendo:'À beira da morte. Controle turnos e estabilização.',
+    Enlouquecendo:'À beira do colapso mental. Controle rodadas.',
+    Perturbado:'Abalado mentalmente.',
+    Sangrando:'Perde PV no início do turno.',
+    Vulnerável:'Sofre penalidade defensiva.',
+    Desprevenido:'Defesa reduzida contra ataques.',
+    Fraco:'Penalidade em testes físicos.',
+    Debilitado:'Penalidade severa em testes.',
+    Cego:'Não enxerga.',
+    Surdo:'Não escuta.',
+    Caído:'Está no chão.',
+    Agarrado:'Movimento limitado.',
+    Imóvel:'Não pode se mover.',
+    Pasmo:'Ação limitada.',
+    Atordoado:'Ação severamente limitada.',
+    Confuso:'Ações incertas ou desordenadas.',
+    Exposto:'Sem cobertura ou proteção.'
+  };
+  S.conditions.push({id:id('cond'),name:choice,dur:'3',effect:effects[choice]||'',def:(choice==='Vulnerável'||choice==='Desprevenido')?'-2':'0',skill:'',skillMod:'0'});
+  S.report.conditions++;
+  render();
+}
+
+function showImportReview(candidate, source){
+  pendingImport=merge(blank(),candidate);
+  const p=pendingImport.p||{}, st=pendingImport.stats||{};
+  modalBg.classList.add('show');
+  modal.innerHTML=`<h2>Revisar importação</h2><p class="muted">Origem: ${esc(source)}. Confira antes de aplicar.</p><div class="item"><div class="title">${esc(p.name||'Sem nome')}</div><p class="meta">${esc(p.class||'Classe')} • ${esc(p.trail||'Trilha')} • NEX ${esc(p.nex||'—')}% • Nível ${esc(p.level||'—')}</p><div class="badges">${badge('PV '+(st.pv||0)+'/'+(st.pvMax||0),'info')}${badge('PE '+(st.pe||0)+'/'+(st.peMax||0),'info')}${badge('PD '+(st.pd||0)+'/'+(st.pdMax||0),'info')}${badge('SAN '+(st.san||0)+'/'+(st.sanMax||0),'info')}</div><p class="meta">Armas: ${(pendingImport.weapons||[]).length} • Rituais: ${(pendingImport.rituals||[]).length} • Poderes: ${(pendingImport.powers||[]).length} • Itens: ${(pendingImport.items||[]).length} • Proteções: ${(pendingImport.protections||[]).length}</p></div><div class="actions"><button class="green" onclick="applyImport('all')">Aplicar tudo</button><button class="blue" onclick="applyImport('status')">Só identidade/status</button><button class="gold" onclick="applyImport('combat')">Só combate</button><button class="purple" onclick="applyImport('paranormal')">Só rituais/poderes</button><button onclick="applyImport('inventory')">Só inventário</button><button class="danger" onclick="closeModal()">Cancelar</button></div>`;
+}
+
+function applyImport(mode){
+  if(!pendingImport)return;
+  if(mode==='all'){
+    S=merge(blank(),pendingImport);
+  }else{
+    if(mode==='status'){
+      S.p={...S.p,...pendingImport.p};
+      S.stats={...S.stats,...pendingImport.stats};
+      S.attrs={...S.attrs,...pendingImport.attrs};
+      S.skills={...S.skills,...pendingImport.skills};
+    }
+    if(mode==='combat'){
+      S.weapons=pendingImport.weapons||S.weapons;
+      S.conditions=pendingImport.conditions||S.conditions;
+      S.buffs=pendingImport.buffs||S.buffs;
+    }
+    if(mode==='paranormal'){
+      S.rituals=pendingImport.rituals||S.rituals;
+      S.powers=pendingImport.powers||S.powers;
+      S.nexChanges=pendingImport.nexChanges||S.nexChanges;
+    }
+    if(mode==='inventory'){
+      S.items=pendingImport.items||S.items;
+      S.protections=pendingImport.protections||S.protections;
+    }
+  }
+  pendingImport=null;
+  closeModal();
+  toast('Importação aplicada.');
+  render();
+}
+
+function importJSONFile(ev){
+  let f=ev.target.files[0]; if(!f)return;
+  let r=new FileReader();
+  r.onload=()=>{try{showImportReview(smartImport(JSON.parse(r.result)),'Arquivo JSON')}catch(e){toast('JSON inválido: '+e.message)}};
+  r.readAsText(f); ev.target.value='';
+}
+
+function importJSONText(txt){
+  try{showImportReview(smartImport(JSON.parse(txt)),'JSON colado')}catch(e){toast('JSON inválido: '+e.message)}
+}
+
+function importPlainText(txt){
+  try{
+    if(!String(txt||'').trim())return toast('Cole uma ficha em texto primeiro.');
+    showImportReview(smartImportText(txt),'Texto colado');
+  }catch(e){toast('Erro ao importar texto: '+e.message)}
+}
+
+function previewPlainText(txt){
+  try{showImportReview(smartImportText(txt),'Prévia de texto')}catch(e){toast('Erro na prévia: '+e.message)}
+}
+
+function executeCombo(idv){
+  const c=S.combos.find(x=>x.id===idv); if(!c)return;
+  S.stats.pe=Math.max(0,n(S.stats.pe)-n(c.pe||c.costPe||0));
+  S.stats.pd=Math.max(0,n(S.stats.pd)-n(c.pd||c.costPd||0));
+  if(c.tests)String(c.tests).split(';').map(x=>x.trim()).filter(Boolean).forEach(t=>roll(t,'Combo: '+c.name));
+  if(c.damage)roll(c.damage,'Dano combo: '+c.name,true);
+  log('Combo',`${c.name} executado.`);
+  S.sessionLog.push({type:'combo',name:c.name,time:new Date().toLocaleString('pt-BR')});
+  render();
+}
+
+function comboCard(c){
+  return `<div class="item"><div class="title">${esc(c.name||'Combo')}</div><p class="meta">PE ${c.pe||c.costPe||0} • PD ${c.pd||c.costPd||0} • Testes ${esc(c.tests||'—')} • Dano ${esc(c.damage||'—')}</p><p class="desc">${esc(c.actions||c.notes||'')}</p><div class="mini"><button class="green" onclick="executeCombo('${c.id}')">Executar</button><button onclick="editGeneric('combos','${c.id}',['name','requirements','buffs','actions','pe','pd','tests','damage','risk','notes'])">Editar</button><button class="danger" onclick="remove('combos','${c.id}')">Excluir</button></div></div>`;
+}
+
+views.preparar=function(){
+ return `<section class="card"><h2>Preparar Ação</h2>${field('Título','prepare.title')}${field('Ação principal','prepare.mainAction')}${field('Movimento','prepare.moveAction')}${field('Livre','prepare.freeAction')}${field('Reação','prepare.reaction')}${field('Vou usar','prepare.use')}${field('Alvo','prepare.target')}<div class="grid two">${numField('PE','prepare.pe')}${numField('PD','prepare.pd')}${numField('PV','prepare.pv')}${numField('SAN','prepare.san')}</div>${field('Testes separados por ;','prepare.tests')}${field('Dano','prepare.damage')}${field('Condição aplicada','prepare.condition')}${field('Plano se falhar','prepare.failPlan',3)}${field('Notas','prepare.notes',4)}<div class="actions"><button class="green" onclick="executePrepared()">Executar tudo</button><button class="blue" onclick="copyPrepared()">Copiar</button></div></section><section class="card"><h2>Combos executáveis</h2><button class="green" onclick="addRecord('combos',{id:id('combo'),name:'Novo Combo',requirements:'',buffs:'',actions:'',pe:'0',pd:'0',tests:'',damage:'',risk:'',notes:''})">+ Combo</button>${listCards(S.combos,comboCard)}</section>`;
+}
+
+views.evolucao=function(){
+ return `<section class="card"><h2>Evolução automática</h2><p class="muted">Registre avanços e aplique NEX/Nível rapidamente.</p><div class="actions"><button class="green" onclick="advanceNex(5)">+5% NEX</button><button class="green" onclick="advanceLevel(1)">+1 Nível</button><button class="blue" onclick="addRecord('evolution',{id:id('evo'),from:'',to:'',level:'',power:'',attr:'',skills:'',ritual:'',notes:''})">Registrar manual</button></div>${listCards(S.evolution,x=>recordCard('evolution',x,['from','to','level','power','attr','skills','ritual','notes']))}</section><section class="card"><h2>Alterações de NEX automáticas</h2><p class="muted">Ative a regra em Config/Regras. Quando o NEX mínimo for atingido, os bônus entram nos cálculos derivados.</p><button class="green" onclick="addRecord('nexChanges',{id:id('nex'),nex:'50',name:'Nova alteração',visual:'',mechanic:'',pvMax:'0',peMax:'0',pdMax:'0',sanMax:'0',def:'0',rd:'0',move:'0',dt:'0',skill:'',skillMod:'0',attr:'',attrMod:'0',active:true})">+ Alteração</button>${listCards(S.nexChanges,x=>recordCard('nexChanges',x,['name','nex','visual','mechanic','pvMax','peMax','pdMax','sanMax','def','rd','move','dt','skill','skillMod','attr','attrMod']))}</section><section class="card"><h2>Descanso</h2>${field('Último descanso','rest.lastRest')}${field('Ações de interlúdio','rest.interludeActions',5)}${field('Tratamento','rest.treatment',3)}${field('Fabricação','rest.crafting',3)}${field('Estudo','rest.study',3)}${field('Treino','rest.training',3)}<div class="actions"><button class="green" onclick="full('pv')">Recuperar PV</button><button class="blue" onclick="full('pe')">Recuperar PE</button><button class="gold" onclick="full('san')">Recuperar SAN</button></div></section>`;
+}
+
+function advanceNex(value){
+  const old=S.p.nex; S.p.nex=n(S.p.nex)+value;
+  if(opt('nexNivel'))S.p.level=Math.max(1,Math.ceil(n(S.p.nex)/5));
+  S.evolution.push({id:id('evo'),from:String(old),to:String(S.p.nex),level:String(S.p.level),power:'',attr:'',skills:'',ritual:'',notes:'Avanço automático de NEX'});
+  toast('NEX avançado.');
+  render();
+}
+
+function advanceLevel(value){
+  const old=S.p.level; S.p.level=n(S.p.level)+value;
+  S.evolution.push({id:id('evo'),from:'',to:String(S.p.nex),level:`${old} -> ${S.p.level}`,power:'',attr:'',skills:'',ritual:'',notes:'Avanço automático de nível'});
+  toast('Nível avançado.');
+  render();
+}
+
+views.relatorio=function(){
+  return `<section class="card"><h2>Relatório de sessão</h2><div class="grid two"><div>${numField('Dano causado','report.damageDealt')}${numField('Dano recebido','report.damageTaken')}${numField('PE gasto','report.peSpent')}${numField('PD gasto','report.pdSpent')}${numField('Rituais usados','report.rituals')}${numField('Ataques feitos','report.attacks')}${field('Notas','report.notes',5)}<button class="blue" onclick="copySessionReport()">Copiar relatório</button></div><div><h3>Resumo para o mestre</h3><button class="gold" onclick="copy(masterSummary())">Copiar resumo</button><pre>${esc(masterSummary())}</pre></div></div></section><section class="card"><h2>Histórico da sessão</h2>${S.logs.slice().reverse().slice(0,30).map(l=>`<div class="item"><b>${esc(l.title)}</b><p class="meta">${esc(l.text)}<br>${esc(l.time)}</p></div>`).join('')||'<p class="muted">Sem histórico.</p>'}</section>`;
+}
+
+function copySessionReport(){
+  const txt=`Relatório — ${S.p.name}
+Dano causado: ${S.report.damageDealt}
+Dano recebido: ${S.report.damageTaken}
+PE gasto: ${S.report.peSpent}
+PD gasto: ${S.report.pdSpent}
+Rituais usados: ${S.report.rituals}
+Ataques feitos: ${S.report.attacks}
+Notas: ${S.report.notes}
+
+${masterSummary()}`;
+  copy(txt);
+}
+
+const oldRoll=roll;
+roll=function(exp,title,damage=false){
+  if(damage){
+    try{S.report.damageDealt+=0}catch(e){}
+  }else if(String(title).toLowerCase().includes('ataque')){
+    S.report.attacks++;
+  }
+  return oldRoll(exp,title,damage);
+}
+
+const oldExecutePrepared=executePrepared;
+executePrepared=function(){
+  S.report.peSpent+=n(S.prepare.pe); S.report.pdSpent+=n(S.prepare.pd);
+  return oldExecutePrepared();
+}
+
+const oldCast=typeof cast==='function'?cast:null;
+if(oldCast){
+  cast=function(idv){
+    S.report.rituals++;
+    return oldCast(idv);
+  }
+}
+
+
+function presetCondition(){return addConditionPreset()}
+render();
+</script>
+</body>
+</html>
