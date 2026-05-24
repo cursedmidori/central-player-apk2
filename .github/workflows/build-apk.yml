@@ -1,0 +1,429 @@
+name: Gerar APK HTML WebView
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - "*.html"
+      - ".github/workflows/build-apk.yml"
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Preparar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar SDK Android
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Encontrar HTML da ficha
+        id: html
+        run: |
+          if [ -f "central_player_mobile.html" ]; then
+            echo "file=central_player_mobile.html" >> "$GITHUB_OUTPUT"
+          elif [ -f "central_player.html" ]; then
+            echo "file=central_player.html" >> "$GITHUB_OUTPUT"
+          elif [ -f "index.html" ]; then
+            echo "file=index.html" >> "$GITHUB_OUTPUT"
+          else
+            HTML_FILE="$(find . -maxdepth 1 -type f -name '*.html' | head -n 1 | sed 's#^\./##')"
+
+            if [ -z "$HTML_FILE" ]; then
+              echo "ERRO: Nenhum arquivo HTML foi encontrado na raiz do repositório."
+              echo "Coloque sua ficha na raiz com um destes nomes:"
+              echo "- central_player_mobile.html"
+              echo "- central_player.html"
+              echo "- index.html"
+              exit 1
+            fi
+
+            echo "file=$HTML_FILE" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Criar projeto Android WebView
+        run: |
+          rm -rf android-webview
+
+          mkdir -p android-webview/app/src/main/java/com/orueu/centralplayer
+          mkdir -p android-webview/app/src/main/assets
+          mkdir -p android-webview/app/src/main/res/values
+
+          cp "${{ steps.html.outputs.file }}" android-webview/app/src/main/assets/index.html
+
+          cat > android-webview/settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          rootProject.name = "CentralPlayerHtml"
+          include ":app"
+          EOF
+
+          cat > android-webview/build.gradle <<'EOF'
+          plugins {
+              id "com.android.application" version "8.6.1" apply false
+          }
+          EOF
+
+          cat > android-webview/app/build.gradle <<'EOF'
+          plugins {
+              id "com.android.application"
+          }
+
+          android {
+              namespace "com.orueu.centralplayer"
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId "com.orueu.centralplayer"
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 1
+                  versionName "1.0"
+              }
+          }
+          EOF
+
+          cat > android-webview/app/src/main/res/values/styles.xml <<'EOF'
+          <resources>
+              <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+                  <item name="android:windowNoTitle">true</item>
+                  <item name="android:windowActionBar">false</item>
+                  <item name="android:windowLightStatusBar">false</item>
+                  <item name="android:statusBarColor">#050202</item>
+                  <item name="android:navigationBarColor">#050202</item>
+                  <item name="android:fontFamily">serif</item>
+              </style>
+          </resources>
+          EOF
+
+          cat > android-webview/app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+
+              <application
+                  android:allowBackup="true"
+                  android:usesCleartextTraffic="true"
+                  android:theme="@style/AppTheme"
+                  android:label="Central do Player">
+
+                  <activity
+                      android:name=".MainActivity"
+                      android:screenOrientation="portrait"
+                      android:exported="true">
+
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+      - name: Corrigir exportação JSON para APK
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          html_path = Path("android-webview/app/src/main/assets/index.html")
+          html = html_path.read_text(encoding="utf-8")
+
+          patch = r'''
+          <script>
+          (function () {
+            function getFichaData() {
+              try {
+                if (typeof state !== "undefined") return state;
+              } catch (e) {}
+
+              try {
+                if (typeof S !== "undefined") return S;
+              } catch (e) {}
+
+              return {};
+            }
+
+            function getFichaName() {
+              try {
+                var data = getFichaData();
+                var name = "ficha";
+
+                if (data && data.p && data.p.name) name = data.p.name;
+                else if (data && data.nome) name = data.nome;
+                else if (data && data.name) name = data.name;
+
+                return String(name)
+                  .toLowerCase()
+                  .replace(/[^a-z0-9_-]+/g, "_")
+                  .replace(/^_+|_+$/g, "") || "ficha";
+              } catch (e) {
+                return "ficha";
+              }
+            }
+
+            function exportByAndroid() {
+              var content = JSON.stringify(getFichaData(), null, 2);
+              var fileName = getFichaName() + "_central_player.json";
+
+              if (window.Android && Android.saveJson) {
+                Android.saveJson(fileName, content);
+                return true;
+              }
+
+              return false;
+            }
+
+            var oldExportJSON = window.exportJSON;
+            window.exportJSON = function () {
+              if (exportByAndroid()) return;
+              if (typeof oldExportJSON === "function") return oldExportJSON();
+            };
+
+            var oldExportJSONFile = window.exportJSONFile;
+            window.exportJSONFile = function () {
+              if (exportByAndroid()) return;
+              if (typeof oldExportJSONFile === "function") return oldExportJSONFile();
+            };
+          })();
+          </script>
+          '''
+
+          if "Android.saveJson" not in html:
+            if "</body>" in html:
+              html = html.replace("</body>", patch + "\n</body>")
+            else:
+              html += patch
+
+          html_path.write_text(html, encoding="utf-8")
+          PY
+
+      - name: Criar MainActivity Java
+        run: |
+          cat > android-webview/app/src/main/java/com/orueu/centralplayer/MainActivity.java <<'EOF'
+          package com.orueu.centralplayer;
+
+          import android.annotation.SuppressLint;
+          import android.app.Activity;
+          import android.content.Intent;
+          import android.graphics.Color;
+          import android.net.Uri;
+          import android.os.Bundle;
+          import android.view.ViewGroup;
+          import android.webkit.JavascriptInterface;
+          import android.webkit.ValueCallback;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.widget.Toast;
+
+          import java.io.OutputStream;
+          import java.nio.charset.StandardCharsets;
+
+          public class MainActivity extends Activity {
+              private static final int FILE_CHOOSER_REQUEST = 101;
+              private static final int CREATE_JSON_REQUEST = 102;
+
+              private WebView webView;
+              private ValueCallback<Uri[]> filePathCallback;
+              private String pendingJsonContent;
+
+              @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+
+                  getWindow().setStatusBarColor(Color.rgb(5, 2, 2));
+                  getWindow().setNavigationBarColor(Color.rgb(5, 2, 2));
+
+                  webView = new WebView(this);
+                  webView.setLayoutParams(new ViewGroup.LayoutParams(
+                          ViewGroup.LayoutParams.MATCH_PARENT,
+                          ViewGroup.LayoutParams.MATCH_PARENT
+                  ));
+
+                  WebSettings settings = webView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  settings.setDatabaseEnabled(true);
+                  settings.setAllowFileAccess(true);
+                  settings.setAllowContentAccess(true);
+                  settings.setLoadWithOverviewMode(false);
+                  settings.setUseWideViewPort(false);
+                  settings.setSupportZoom(false);
+                  settings.setBuiltInZoomControls(false);
+                  settings.setDisplayZoomControls(false);
+
+                  webView.addJavascriptInterface(new AndroidBridge(), "Android");
+
+                  webView.setWebChromeClient(new WebChromeClient() {
+                      @Override
+                      public boolean onShowFileChooser(
+                              WebView webView,
+                              ValueCallback<Uri[]> filePathCallback,
+                              FileChooserParams fileChooserParams
+                      ) {
+                          if (MainActivity.this.filePathCallback != null) {
+                              MainActivity.this.filePathCallback.onReceiveValue(null);
+                          }
+
+                          MainActivity.this.filePathCallback = filePathCallback;
+
+                          Intent intent = fileChooserParams.createIntent();
+                          intent.setType("*/*");
+                          intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                                  "application/json",
+                                  "text/json",
+                                  "text/plain",
+                                  "*/*"
+                          });
+
+                          try {
+                              startActivityForResult(intent, FILE_CHOOSER_REQUEST);
+                          } catch (Exception e) {
+                              MainActivity.this.filePathCallback = null;
+                              Toast.makeText(
+                                      MainActivity.this,
+                                      "Não consegui abrir o seletor de arquivos.",
+                                      Toast.LENGTH_SHORT
+                              ).show();
+                              return false;
+                          }
+
+                          return true;
+                      }
+                  });
+
+                  setContentView(webView);
+                  webView.loadUrl("file:///android_asset/index.html");
+              }
+
+              public class AndroidBridge {
+                  @JavascriptInterface
+                  public void saveJson(String fileName, String content) {
+                      pendingJsonContent = content;
+
+                      runOnUiThread(() -> {
+                          Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                          intent.addCategory(Intent.CATEGORY_OPENABLE);
+                          intent.setType("application/json");
+                          intent.putExtra(
+                                  Intent.EXTRA_TITLE,
+                                  fileName == null || fileName.trim().isEmpty()
+                                          ? "ficha_central_player.json"
+                                          : fileName
+                          );
+
+                          try {
+                              startActivityForResult(intent, CREATE_JSON_REQUEST);
+                          } catch (Exception e) {
+                              Toast.makeText(
+                                      MainActivity.this,
+                                      "Não consegui abrir a tela de salvar arquivo.",
+                                      Toast.LENGTH_SHORT
+                              ).show();
+                          }
+                      });
+                  }
+              }
+
+              @Override
+              protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+                  super.onActivityResult(requestCode, resultCode, data);
+
+                  if (requestCode == FILE_CHOOSER_REQUEST) {
+                      if (filePathCallback == null) return;
+
+                      Uri[] results = null;
+
+                      if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+                          results = new Uri[]{data.getData()};
+                      }
+
+                      filePathCallback.onReceiveValue(results);
+                      filePathCallback = null;
+                      return;
+                  }
+
+                  if (requestCode == CREATE_JSON_REQUEST) {
+                      if (
+                              resultCode == Activity.RESULT_OK &&
+                              data != null &&
+                              data.getData() != null &&
+                              pendingJsonContent != null
+                      ) {
+                          try {
+                              Uri uri = data.getData();
+                              OutputStream outputStream = getContentResolver().openOutputStream(uri);
+
+                              if (outputStream != null) {
+                                  outputStream.write(pendingJsonContent.getBytes(StandardCharsets.UTF_8));
+                                  outputStream.close();
+
+                                  Toast.makeText(this, "JSON salvo.", Toast.LENGTH_SHORT).show();
+                                  webView.evaluateJavascript(
+                                          "if (typeof toast === 'function') toast('Arquivo JSON salvo.')",
+                                          null
+                                  );
+                              }
+                          } catch (Exception e) {
+                              Toast.makeText(this, "Erro ao salvar JSON.", Toast.LENGTH_SHORT).show();
+                          }
+                      }
+
+                      pendingJsonContent = null;
+                  }
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
+              }
+          }
+          EOF
+
+      - name: Gerar APK Debug
+        working-directory: android-webview
+        run: gradle :app:assembleDebug
+
+      - name: Enviar APK como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: central-player-html-webview-apk
+          path: android-webview/app/build/outputs/apk/debug/app-debug.apk
